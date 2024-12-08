@@ -39,8 +39,8 @@
         .container h2 {
             font-size: 22px;
             color: #00aaff;
-            margin-bottom: 8px;  /* Reduced margin-bottom */
-            margin-top: -20px;   /* Move up by 20px */
+            margin-bottom: 8px;
+            margin-top: -20px;
             padding: 8px 20px;
             border: none;
             background: linear-gradient(135deg, #007ee5, #00aaff);
@@ -133,9 +133,27 @@
         #fileNameSection i:hover {
             transform: scale(1.1);
         }
+
+        /* Styles for the pull-to-refresh indicator */
+        #pull-to-refresh {
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px;
+            background-color: #007ee5;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            display: none;
+            transition: top 0.3s ease;
+        }
+
     </style>
 </head>
 <body>
+
+<div id="pull-to-refresh">Pull to refresh...</div>
 
 <div class="container">
     <h2>Wireguard Tool V1.1</h2>
@@ -162,6 +180,30 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
 <script>
+    // Detect pull-to-refresh action
+    let startY = 0;
+    let pullToRefresh = document.getElementById('pull-to-refresh');
+    
+    window.addEventListener('touchstart', function(event) {
+        startY = event.touches[0].pageY;
+    });
+
+    window.addEventListener('touchmove', function(event) {
+        let moveY = event.touches[0].pageY;
+        if (moveY - startY > 50) { // When the user pulls down more than 50px
+            pullToRefresh.style.display = 'block';
+            pullToRefresh.style.top = '10px';
+        }
+    });
+
+    window.addEventListener('touchend', function(event) {
+        if (pullToRefresh.style.top === '10px') {
+            location.reload(); // Refresh the page
+        }
+        pullToRefresh.style.display = 'none';
+        pullToRefresh.style.top = '-50px';
+    });
+
     // Function to fetch the user's IP and provider info
     async function fetchUserIPInfo() {
         try {
