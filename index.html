@@ -121,22 +121,16 @@
             color: #333;
         }
 
-        #fileNameSection button {
-            padding: 8px 15px;
-            font-size: 14px;
-            font-weight: 500;
-            border: 2px solid #007ee5;
-            background-color: white;
-            color: #007ee5;
-            border-radius: 5px;
+        #fileNameSection i {
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 24px;
+            color: #007ee5;
+            margin-left: 15px;
+            transition: transform 0.3s ease;
         }
 
-        #fileNameSection button:hover {
-            background-color: #007ee5;
-            color: white;
-            transform: scale(1.05);
+        #fileNameSection i:hover {
+            transform: scale(1.1);
         }
 
         /* Modernized notification styles */
@@ -197,13 +191,12 @@
                 border: 1px solid #444;
             }
 
-            #fileNameSection button {
-                background-color: #007ee5;
-                color: white;
+            #fileNameSection i {
+                color: #00aaff;
             }
 
-            #fileNameSection button:hover {
-                background-color: #005bb5;
+            #fileNameSection i:hover {
+                color: #007ee5;
             }
         }
 
@@ -246,7 +239,13 @@
     <!-- Filename Section remains hidden until decoding -->
     <div id="fileNameSection">
         <input type="text" id="fileName" placeholder="Enter filename" />
-        <button id="downloadBtn"><i class="fas fa-download"></i> Download</button>
+        <!-- Icons for Download, Zip, and WireGuard -->
+        <i class="fas fa-download" id="downloadIcon" onclick="downloadQRCode()"></i>
+        <i class="fas fa-file-archive" id="zipIcon" onclick="downloadZIP()"></i>
+        <!-- WireGuard Icon that links to the WireGuard Android app on the Google Play Store -->
+        <a href="https://play.google.com/store/apps/details?id=com.wireguard.android" target="_blank">
+            <i class="fas fa-shield-alt" id="wireguardIcon"></i>
+        </a>
     </div>
 </div>
 
@@ -254,6 +253,7 @@
 <div id="notification" class="notification">Content copied to clipboard!</div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
 <script>
     // Function to fetch the user's IP and provider info
     async function fetchUserIPInfo() {
@@ -319,26 +319,44 @@ PersistentKeepalive = 25
             `;
             feedbackElement.textContent = decodedContent;
 
-            // Show the file name input and download button after decoding the QR code
+            // Show the file name input and download icons after decoding the QR code
             document.getElementById('fileNameSection').style.display = 'flex';
 
-            // Enable the download button and set up the download link
-            document.getElementById('downloadBtn').onclick = function() {
-                const fileName = document.getElementById('fileName').value || 'config.conf'; // Use input value or default name
-                download(decodedContent, fileName);
-            };
+            // Enable the download and zip icons
+            document.getElementById('downloadIcon').style.display = 'inline-block';
+            document.getElementById('zipIcon').style.display = 'inline-block';
+            document.getElementById('wireguardIcon').style.display = 'inline-block';
         } else {
             feedbackElement.textContent = 'QR code could not be decoded. Please try a different file.';
         }
     }
 
     // Function to trigger download with custom filename
-    function download(content, fileName) {
+    function downloadQRCode() {
+        const content = document.getElementById('qrFeedback').textContent;
+        const fileName = document.getElementById('fileName').value || 'config.conf'; // Use input value or default name
         const blob = new Blob([content], { type: 'application/octet-stream' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = fileName.endsWith('.conf') ? fileName : fileName + '.conf'; // Ensure the extension is .conf
         link.click();
+    }
+
+    // Function to trigger download as ZIP with the same filename
+    function downloadZIP() {
+        const content = document.getElementById('qrFeedback').textContent;
+        const fileName = document.getElementById('fileName').value || 'config.zip'; // Use input value or default name
+
+        const zip = new JSZip();
+        const fileBaseName = fileName.replace(/\.zip$/, ''); // Remove any .zip extension if present
+        zip.file(fileBaseName + '.conf', content);
+
+        zip.generateAsync({ type: 'blob' }).then(function (blob) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileBaseName + '.zip'; // Use the same base filename with .zip extension
+            link.click();
+        });
     }
 
     // Function to copy the content to the clipboard when clicked
