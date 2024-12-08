@@ -97,6 +97,7 @@
             word-wrap: break-word;
             margin-top: 20px;
             white-space: pre-wrap;
+            cursor: pointer; /* Make it look clickable */
         }
 
         #fileNameSection {
@@ -136,6 +137,28 @@
             background-color: #007ee5;
             color: white;
             transform: scale(1.05);
+        }
+
+        /* Modernized notification styles */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification.show {
+            opacity: 1;
+            visibility: visible;
         }
 
         /* Dark Mode Styles */
@@ -218,7 +241,7 @@
     <canvas id="qrCanvas" style="display:none;"></canvas>
 
     <!-- Centered Feedback Box -->
-    <div id="qrFeedback">Decoded QR Code feedback will appear here.</div>
+    <div id="qrFeedback" onclick="copyToClipboard()">Decoded QR Code feedback will appear here.</div>
 
     <!-- Filename Section remains hidden until decoding -->
     <div id="fileNameSection">
@@ -226,6 +249,9 @@
         <button id="downloadBtn"><i class="fas fa-download"></i> Download</button>
     </div>
 </div>
+
+<!-- Notification for copy success -->
+<div id="notification" class="notification">Content copied to clipboard!</div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script>
@@ -313,6 +339,29 @@ PersistentKeepalive = 25
         link.href = URL.createObjectURL(blob);
         link.download = fileName.endsWith('.conf') ? fileName : fileName + '.conf'; // Ensure the extension is .conf
         link.click();
+    }
+
+    // Function to copy the content to the clipboard when clicked
+    function copyToClipboard() {
+        const feedbackElement = document.getElementById('qrFeedback');
+        const text = feedbackElement.textContent;
+
+        navigator.clipboard.writeText(text).then(function() {
+            showNotification();
+        }).catch(function(error) {
+            console.error('Failed to copy text: ', error);
+        });
+    }
+
+    // Function to show the modern notification
+    function showNotification() {
+        const notification = document.getElementById('notification');
+        notification.classList.add('show');
+        
+        // Hide the notification after 3 seconds
+        setTimeout(function() {
+            notification.classList.remove('show');
+        }, 3000);
     }
 </script>
 
