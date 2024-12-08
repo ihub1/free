@@ -18,7 +18,7 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            overflow: hidden; /* Disables scrolling */
+            overflow: hidden;
         }
 
         .container {
@@ -97,7 +97,7 @@
             word-wrap: break-word;
             margin-top: 20px;
             white-space: pre-wrap;
-            cursor: pointer; /* Make it look clickable */
+            cursor: pointer;
         }
 
         #fileNameSection {
@@ -132,100 +132,12 @@
         #fileNameSection i:hover {
             transform: scale(1.1);
         }
-
-        /* Modernized notification styles */
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #28a745;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 16px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .notification.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Dark Mode Styles */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #121212; /* Dark background */
-                color: #fff; /* White text */
-            }
-
-            .container {
-                background-color: #1f1f1f; /* Dark container background */
-            }
-
-            .container h2 {
-                color: white; /* Make the heading text white in dark mode */
-                background: linear-gradient(135deg, #00aaff, #007ee5);
-            }
-
-            .upload-btn {
-                background-color: #007ee5;
-                color: white;
-            }
-
-            .upload-btn:hover {
-                background-color: #005bb5;
-            }
-
-            #qrFeedback {
-                background-color: #333; /* Dark feedback background */
-                border: 1px solid #444;
-            }
-
-            #fileNameSection input {
-                background-color: #333;
-                color: #fff;
-                border: 1px solid #444;
-            }
-
-            #fileNameSection i {
-                color: #00aaff;
-            }
-
-            #fileNameSection i:hover {
-                color: #007ee5;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-
-            .container h2 {
-                font-size: 18px;
-                padding: 10px 18px;
-            }
-
-            #qrFeedback {
-                max-width: 90%;
-                font-size: 13px;
-            }
-
-            #fileNameSection input {
-                width: 45%;
-            }
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Wireguard Tool V1.1</h2>
-    <!-- Display user IP and Provider -->
     <div id="userIP">Loading your IP...</div>
     <div id="ipProvider">Loading IP provider...</div>
 
@@ -233,24 +145,18 @@
     <input type="file" id="uploadInput" accept="image/*">
     <canvas id="qrCanvas" style="display:none;"></canvas>
 
-    <!-- Centered Feedback Box -->
     <div id="qrFeedback" onclick="copyToClipboard()">Decoded QR Code feedback will appear here.</div>
 
-    <!-- Filename Section remains hidden until decoding -->
     <div id="fileNameSection">
         <input type="text" id="fileName" placeholder="Enter filename" />
-        <!-- Icons for Download, Zip, and WireGuard -->
         <i class="fas fa-download" id="downloadIcon" onclick="downloadQRCode()"></i>
         <i class="fas fa-file-archive" id="zipIcon" onclick="downloadZIP()"></i>
-        <!-- WireGuard Icon that links to the WireGuard Android app on the Google Play Store -->
+        <!-- Shield icon directing to Google Play WireGuard app -->
         <a href="https://play.google.com/store/apps/details?id=com.wireguard.android" target="_blank">
             <i class="fas fa-shield-alt" id="wireguardIcon"></i>
         </a>
     </div>
 </div>
-
-<!-- Notification for copy success -->
-<div id="notification" class="notification">Content copied to clipboard!</div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
@@ -269,7 +175,6 @@
         }
     }
 
-    // Fetch user IP info when the page loads
     fetchUserIPInfo();
 
     document.getElementById('uploadInput').addEventListener('change', handleFileUpload);
@@ -293,7 +198,7 @@
     function decodeQRCode(img) {
         const canvas = document.getElementById('qrCanvas');
         const ctx = canvas.getContext('2d');
-        
+
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
@@ -302,7 +207,7 @@
         const code = jsQR(imageData.data, canvas.width, canvas.height);
 
         const feedbackElement = document.getElementById('qrFeedback');
-        
+
         if (code) {
             const decodedContent = `
 [Interface]
@@ -319,10 +224,8 @@ PersistentKeepalive = 25
             `;
             feedbackElement.textContent = decodedContent;
 
-            // Show the file name input and download icons after decoding the QR code
             document.getElementById('fileNameSection').style.display = 'flex';
 
-            // Enable the download and zip icons
             document.getElementById('downloadIcon').style.display = 'inline-block';
             document.getElementById('zipIcon').style.display = 'inline-block';
             document.getElementById('wireguardIcon').style.display = 'inline-block';
@@ -331,55 +234,39 @@ PersistentKeepalive = 25
         }
     }
 
-    // Function to trigger download with custom filename
     function downloadQRCode() {
         const content = document.getElementById('qrFeedback').textContent;
-        const fileName = document.getElementById('fileName').value || 'config.conf'; // Use input value or default name
+        const fileName = document.getElementById('fileName').value || 'config.conf';
         const blob = new Blob([content], { type: 'application/octet-stream' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = fileName.endsWith('.conf') ? fileName : fileName + '.conf'; // Ensure the extension is .conf
+        link.download = fileName.endsWith('.conf') ? fileName : fileName + '.conf';
         link.click();
     }
 
-    // Function to trigger download as ZIP with the same filename
     function downloadZIP() {
         const content = document.getElementById('qrFeedback').textContent;
-        const fileName = document.getElementById('fileName').value || 'config.zip'; // Use input value or default name
+        const fileName = document.getElementById('fileName').value || 'config.zip';
 
         const zip = new JSZip();
-        const fileBaseName = fileName.replace(/\.zip$/, ''); // Remove any .zip extension if present
+        const fileBaseName = fileName.replace(/\.zip$/, '');
         zip.file(fileBaseName + '.conf', content);
 
         zip.generateAsync({ type: 'blob' }).then(function (blob) {
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = fileBaseName + '.zip'; // Use the same base filename with .zip extension
+            link.download = fileBaseName + '.zip';
             link.click();
         });
     }
 
-    // Function to copy the content to the clipboard when clicked
     function copyToClipboard() {
         const feedbackElement = document.getElementById('qrFeedback');
         const text = feedbackElement.textContent;
 
-        navigator.clipboard.writeText(text).then(function() {
-            showNotification();
-        }).catch(function(error) {
+        navigator.clipboard.writeText(text).catch(function(error) {
             console.error('Failed to copy text: ', error);
         });
-    }
-
-    // Function to show the modern notification
-    function showNotification() {
-        const notification = document.getElementById('notification');
-        notification.classList.add('show');
-        
-        // Hide the notification after 3 seconds
-        setTimeout(function() {
-            notification.classList.remove('show');
-        }, 3000);
     }
 </script>
 
